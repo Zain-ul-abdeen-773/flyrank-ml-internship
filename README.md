@@ -1,6 +1,60 @@
-# FlyRank ML Internship — Starter Repo
+# FlyRank ML Internship — Zain ul Abdeen
 
 **Applied Search Intelligence: Google Search Ranking & Discoverability**
+
+---
+
+## Assignment 1 — Submission Context
+
+> **Intern:** Zain ul Abdeen · **Repo:** [`Zain-ul-abdeen-773/flyrank-ml-internship`](https://github.com/Zain-ul-abdeen-773/flyrank-ml-internship)
+
+### ✅ What was completed
+
+| Requirement | Status | Details |
+|---|---|---|
+| Pipeline ran end-to-end | ✅ | `python scripts/run_all.py` — 30,000 rows, 5 steps, all passing |
+| Notebook 01 executed top to bottom | ✅ | [`notebooks/01_first_look_and_discovery.ipynb`](notebooks/01_first_look_and_discovery.ipynb) |
+| Notebook 02 executed top to bottom | ✅ | [`notebooks/02_your_first_readable_model.ipynb`](notebooks/02_your_first_readable_model.ipynb) |
+| "Your turn" cell attempted (NB01) | ✅ | Discovery D — see below |
+| "Your turn" cell attempted (NB02) | ✅ | Depth & feature experiments — see below |
+| Public repo | ✅ | Visible at the link above |
+| No private data committed | ✅ | `scripts/` untouched, CI leak-guard intact |
+
+### Key pipeline result
+
+```
+Hand-written rule   Precision@50: 0.240   (~12 of the top 50 right)
+Random forest       Precision@50: 0.740   (~37 of the top 50 right)
+→ ~3.1x lift · split: client_holdout · best model: random_forest
+```
+
+### Notebook 01 — "Your turn" discovery (cell 8)
+
+**Discovery D: Does `content_age_days` relate to `trend_direction`?**
+
+- Declining pages have a **lower** median content age (216 days) than stable (300) or up (291.5) pages — younger content declines more, contradicting the "old content decays" intuition.
+- `avg_position` vs `ctr` correlation: **−0.073** — directionally negative but weak; position alone doesn't explain CTR variation.
+- Declining rate by age tier: 31–90 days (0.669) → 365+ days (0.426) — newer-to-mid content shows the highest decline rates in this dataset.
+
+### Notebook 02 — "Your turn" experiment (cell 7)
+
+**Experiment 1: Effect of `max_depth` on Precision@50 (in-sample)**
+
+| max_depth | Precision@50 |
+|---|---|
+| 2 | 0.720 |
+| 3 | 0.680 |
+| 4 | 0.660 |
+
+Deeper ≠ better in-sample here — the depth-2 tree already captures the main signal, and extra splits overfit to noise. The depth-3 tree is still readable (first split: `impressions_90d ≤ 5.50`, then `content_age_days`).
+
+**Experiment 2: Alternative feature set** (dropped `impressions_90d` and `word_count`, added `engagement_rate` and `scroll_rate`)
+
+- Precision@50 dropped to **0.560** — `impressions_90d` was carrying important signal.
+- First split changed to `avg_position ≤ 0.55` → feature choice fundamentally reshapes the model.
+- All results are in-sample; the real evaluation uses client-holdout (`scripts/03_train_model.py`).
+
+---
 
 This is the starting point for the FlyRank ML Internship. You **clone it**, build your work in
 **your own public repo**, and share that repo URL with Assignment 1 — it's your workspace, your
