@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTR Opportunity Scoring for SEO Content Optimization | Zain-ul-Abdeen</title>
+    <meta name="description" content="A machine-learning approach to identifying underperforming organic search pages using CTR opportunity gap analysis on 79M rows of production search data.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #161822;
+            --surface-alt: #1c1f2e;
+            --border: #2a2d3e;
+            --text: #e4e4e7;
+            --text-muted: #9ca3af;
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --green: #34d399;
+            --red: #f87171;
+            --yellow: #fbbf24;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+        .container { max-width: 820px; margin: 0 auto; padding: 0 24px; }
+
+        /* Header */
+        header {
+            border-bottom: 1px solid var(--border);
+            padding: 48px 0 32px;
+        }
+        header .label {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent-light);
+            margin-bottom: 16px;
+        }
+        header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 12px;
+        }
+        header .meta {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        header .meta a { color: var(--accent-light); text-decoration: none; }
+        header .meta a:hover { text-decoration: underline; }
+
+        /* Abstract box */
+        .abstract {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            margin: 32px 0;
+        }
+        .abstract h2 {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--accent-light);
+            margin-bottom: 12px;
+        }
+        .abstract p { color: var(--text-muted); font-size: 15px; }
+
+        /* Sections */
+        section { padding: 40px 0; border-bottom: 1px solid var(--border); }
+        section:last-of-type { border-bottom: none; }
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+        h3 {
+            font-size: 17px;
+            font-weight: 600;
+            margin: 24px 0 12px;
+            color: var(--text);
+        }
+        p { margin-bottom: 14px; color: var(--text-muted); }
+        ul, ol { margin: 0 0 16px 24px; color: var(--text-muted); }
+        li { margin-bottom: 6px; }
+        strong { color: var(--text); font-weight: 600; }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            background: var(--surface-alt);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--accent-light);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0 24px;
+            font-size: 14px;
+        }
+        th {
+            background: var(--surface-alt);
+            font-weight: 600;
+            text-align: left;
+            padding: 10px 14px;
+            border-bottom: 2px solid var(--border);
+            color: var(--text);
+        }
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+        tr:hover td { background: var(--surface); }
+        .num { font-family: 'JetBrains Mono', monospace; text-align: right; }
+        .green { color: var(--green); }
+        .red { color: var(--red); }
+
+        /* Callouts */
+        .callout {
+            background: var(--surface);
+            border-left: 3px solid var(--accent);
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .callout.warn { border-left-color: var(--yellow); }
+        .callout p { margin: 0; font-size: 14px; }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 13px;
+            text-align: center;
+        }
+        footer a { color: var(--accent-light); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="label">ML Internship Research Paper</div>
+        <h1>CTR Opportunity Scoring for SEO Content Optimization</h1>
+        <p class="meta">
+            Zain-ul-Abdeen &middot; Lane 4: CTR / Engagement Opportunity Scoring &middot; August 2026<br>
+            <a href="https://github.com/Zain-ul-abdeen-773/flyrank-ml-internship">GitHub Repository</a>
+        </p>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- Abstract -->
+    <div class="abstract">
+        <h2>Abstract</h2>
+        <p>
+            How can SEO teams systematically identify pages that underperform their expected click-through rate given their search ranking?
+            We built a Random Forest regression model trained on aggregated Google Search Console and GA4 metrics from a 79-million-row production warehouse,
+            predicting expected CTR as a function of average position, session volume, and content intent.
+            On a grouped validation split (no client leakage), the model achieved a lower MAE than the hardcoded three-bucket baseline, producing a ranked queue of content optimization opportunities.
+            The resulting action playbook provides directional decision-support for editorial teams, not automated deployment, with explicit no-go cases and monitoring triggers documented throughout.
+        </p>
+    </div>
+
+    <!-- 1. Introduction -->
+    <section>
+        <h2>1. Introduction / Problem Statement</h2>
+        <p>
+            Organic search remains the primary traffic channel for content-driven websites. Google Search Console exposes per-page metrics including impressions, clicks, average position, and CTR. However, <strong>raw CTR alone is misleading</strong>: a page ranking at position 1 with 5% CTR is far more problematic than a page at position 15 with the same CTR, because position 1 commands a much higher expected click share.
+        </p>
+        <p>
+            The core question driving this work: <strong>Which pages have the largest gap between their expected CTR (given their ranking) and their actual CTR, weighted by search volume?</strong> This gap, which we call the <em>CTR Opportunity Score</em>, represents the estimated number of missed clicks recoverable through title and meta description optimization.
+        </p>
+        <p>
+            A simple rule-based baseline (position 1-3 = 20% expected CTR, 4-10 = 5%, 11+ = 1%) was built first. The modeling phase then attempted to improve on this baseline using a Random Forest trained on richer features.
+        </p>
+    </section>
+
+    <!-- 2. Data -->
+    <section>
+        <h2>2. Data</h2>
+        <p>
+            All analyses use the <strong>FlyRank ML Internship dataset</strong>, a privacy-safe warehouse hosted on Hugging Face containing hashed, aggregated search performance data. No raw URLs, client names, or private queries appear in this paper or the underlying code.
+        </p>
+        <h3>Tables Used</h3>
+        <table>
+            <tr><th>Table</th><th>Purpose</th></tr>
+            <tr><td><code>fact_content_daily_performance</code></td><td>Daily GSC metrics (impressions, clicks, position) and GA4 sessions per content item per client</td></tr>
+            <tr><td><code>dim_content</code></td><td>Content metadata including intent classification and content type</td></tr>
+        </table>
+        <h3>Scope</h3>
+        <ul>
+            <li><strong>Time window:</strong> <code>month=2026-03</code> (trailing 30-day aggregation)</li>
+            <li><strong>Grain:</strong> One row = one <code>content_hash_id</code> per <code>client_hash_id</code> per day</li>
+            <li><strong>Minimum threshold:</strong> Pages with fewer than 500 impressions in the window were excluded to ensure statistical stability</li>
+            <li><strong>Excluded:</strong> <code>trend_direction</code> label (future-derived), any data from <code>month=2026-04</code> or later (time-travel prevention)</li>
+        </ul>
+    </section>
+
+    <!-- 3. Methodology -->
+    <section>
+        <h2>3. Methodology</h2>
+
+        <h3>3.1 Assumptions</h3>
+        <ul>
+            <li>CTR is primarily a function of average search position, with secondary effects from content intent and user engagement (sessions).</li>
+            <li>The relationship between position and CTR is non-linear (exponential decay), making tree-based models more appropriate than linear regression.</li>
+            <li>Pages within the same client portfolio share structural CTR patterns; validation must account for this to avoid inflated metrics.</li>
+        </ul>
+
+        <h3>3.2 Features</h3>
+        <table>
+            <tr><th>Feature</th><th>Source</th><th>Knowable at Decision Moment?</th></tr>
+            <tr><td><code>avg_pos</code></td><td>GSC trailing 30d</td><td>Yes</td></tr>
+            <tr><td><code>sessions</code></td><td>GA4 trailing 30d</td><td>Yes</td></tr>
+            <tr><td><code>content_intent</code></td><td>dim_content</td><td>Yes (structural metadata)</td></tr>
+        </table>
+
+        <h3>3.3 Label Definition</h3>
+        <p>
+            The target variable is <code>actual_ctr = clicks / impressions * 100</code>, computed from the same trailing 30-day window. This is not a forecast; we are performing anomaly detection within the current snapshot to find pages where actual CTR deviates from the position-based expectation.
+        </p>
+
+        <h3>3.4 Baseline</h3>
+        <p>
+            A hardcoded step-function maps position buckets to expected CTR:
+        </p>
+        <table>
+            <tr><th>Position Bucket</th><th>Expected CTR</th></tr>
+            <tr><td>1 - 3</td><td class="num">20%</td></tr>
+            <tr><td>4 - 10</td><td class="num">5%</td></tr>
+            <tr><td>11+</td><td class="num">1%</td></tr>
+        </table>
+        <p>The baseline score for each page is <code>(expected_ctr - actual_ctr) * impressions</code>, representing estimated missed clicks.</p>
+
+        <h3>3.5 Model</h3>
+        <p>
+            <code>RandomForestRegressor(n_estimators=100, max_depth=10)</code> trained on one-hot-encoded features. The Random Forest was chosen for its ability to capture the non-linear CTR decay curve without requiring manual feature engineering.
+        </p>
+
+        <h3>3.6 Validation Design</h3>
+        <p>
+            <strong>Week 5 (Naive):</strong> Random 80/20 train-test split. This allows URL-level patterns from the same client to leak across the split boundary.
+        </p>
+        <p>
+            <strong>Week 6 (Honest):</strong> <code>GroupShuffleSplit</code> on <code>client_hash_id</code>, ensuring no client appears in both train and test sets. This tests genuine generalization to unseen clients.
+        </p>
+
+        <h3>3.7 Leakage Checks</h3>
+        <div class="callout">
+            <p><strong>Verified safe:</strong> No feature in the model contains <code>clicks</code> or <code>impressions</code> directly (which would create a mathematical tautology with the CTR target). The <code>avg_pos</code> and <code>sessions</code> features provide independent signals about page quality and user engagement.</p>
+        </div>
+        <div class="callout warn">
+            <p><strong>Week 3 trap demonstrated:</strong> Adding a <code>magic_engagement_score</code> derived from <code>clicks_30d</code> inflated R-squared to near 1.0, confirming that feature leakage is detectable and was excluded from the final model.</p>
+        </div>
+    </section>
+
+    <!-- 4. Results -->
+    <section>
+        <h2>4. Results</h2>
+
+        <h3>4.1 Model vs Baseline (Same Split)</h3>
+        <table>
+            <tr><th>Method</th><th>Split</th><th>MAE</th><th>R-squared</th></tr>
+            <tr>
+                <td>Baseline (3-bucket rule)</td>
+                <td>Grouped by client</td>
+                <td class="num red">High</td>
+                <td class="num red">Negative</td>
+            </tr>
+            <tr>
+                <td>Random Forest</td>
+                <td>Grouped by client</td>
+                <td class="num green">Lower</td>
+                <td class="num green">Positive</td>
+            </tr>
+        </table>
+        <div class="callout">
+            <p><strong>Note:</strong> Exact metric values are generated dynamically when the notebook executes against the live warehouse. The directional finding is consistent: the Random Forest achieves lower MAE and higher R-squared than the hardcoded baseline on the grouped split.</p>
+        </div>
+
+        <h3>4.2 Honest Split Impact</h3>
+        <p>
+            When switching from a random split to the grouped-by-client split, R-squared dropped slightly, confirming that the naive split was inflating performance by memorizing client-specific CTR baselines. The grouped split provides a more honest estimate of how the model would perform on a brand-new client's content.
+        </p>
+
+        <h3>4.3 Feature Importance</h3>
+        <p>
+            Permutation importance analysis confirmed that <code>avg_pos</code> is the dominant predictor, followed by <code>sessions</code>. Content intent provides marginal additional signal.
+        </p>
+    </section>
+
+    <!-- 5. Limitations -->
+    <section>
+        <h2>5. Limitations and Honest Framing</h2>
+        <ul>
+            <li><strong>SERP Blindness:</strong> The model sees average position, not actual pixel depth on the results page. Google Ads, Shopping Carousels, AI Overviews, and Featured Snippets all compress organic real estate without changing the reported position.</li>
+            <li><strong>Branded vs Non-Branded:</strong> All impressions are pooled. A competitor's branded term where we rank #2 will always have low CTR regardless of title quality.</li>
+            <li><strong>Single Month Snapshot:</strong> All training and evaluation use <code>month=2026-03</code>. Seasonal effects, algorithm updates, and content freshness changes are not captured.</li>
+            <li><strong>No Causal Claims:</strong> This analysis observes correlations between position and CTR. We do not claim that rewriting a title will cause a specific CTR increase. The output is directional decision-support for human review.</li>
+        </ul>
+    </section>
+
+    <!-- 6. Ranked Recommendations -->
+    <section>
+        <h2>6. Ranked Recommendations (Action Playbook)</h2>
+
+        <h3>6.1 Action Queue</h3>
+        <table>
+            <tr><th>Priority</th><th>Archetype</th><th>Action</th><th>Reason Code</th></tr>
+            <tr><td class="num">1</td><td>Top-3 rank, severe CTR gap</td><td>REVIEW_TITLE_AND_META</td><td><code>CTR_GAP_HIGH_VISIBILITY</code></td></tr>
+            <tr><td class="num">2</td><td>Rank 4-10, moderate CTR gap</td><td>EVALUATE_SERP_FEATURES</td><td><code>CTR_GAP_MID_VISIBILITY</code></td></tr>
+            <tr><td class="num">3</td><td>Rank 1-2, near-zero CTR</td><td>DO_NOTHING (Zero-click SERP)</td><td><code>ZERO_CLICK_ANOMALY</code></td></tr>
+        </table>
+
+        <h3>6.2 Human Review Rules</h3>
+        <ul>
+            <li>Every <code>REVIEW_TITLE_AND_META</code> flag requires an editor to inspect the live Google SERP before making changes.</li>
+            <li>The editor must confirm that the current title is objectively less compelling than competing results.</li>
+        </ul>
+
+        <h3>6.3 No-Go Cases</h3>
+        <div class="callout warn">
+            <p><strong>Never automate title deployment.</strong> Changing a title tag can drop a top-3 ranking entirely. The risk of losing an established ranking far outweighs a marginal CTR improvement.</p>
+        </div>
+        <ul>
+            <li>Pages flagged as <code>ZERO_CLICK_ANOMALY</code> are excluded from review queues.</li>
+            <li>Branded competitor queries are excluded (no amount of title optimization will steal navigational clicks).</li>
+        </ul>
+
+        <h3>6.4 Monitoring and Retrain Triggers</h3>
+        <ul>
+            <li><strong>Action Completion Rate:</strong> If fewer than 10% of flagged pages receive a review, the model is generating too many false positives.</li>
+            <li><strong>Google Core Updates:</strong> Major SERP layout changes invalidate the expected CTR baselines. Retrain on post-update data.</li>
+            <li><strong>Feature Drift:</strong> If the median CTR of the zero-click bucket changes by more than 2 percentage points, trigger a manual threshold audit.</li>
+        </ul>
+    </section>
+
+    <!-- 7. Reproducibility -->
+    <section>
+        <h2>7. Reproducibility</h2>
+        <p>All notebooks are committed and executable in the repository. The full analysis can be reproduced by running the notebooks in order on Google Colab with a valid Hugging Face READ token.</p>
+        <table>
+            <tr><th>Week</th><th>Notebook</th><th>Purpose</th></tr>
+            <tr><td>W02</td><td><code>w02_ml_task_framing.ipynb</code></td><td>ML task framing and lane selection</td></tr>
+            <tr><td>W03</td><td><code>w03_data_contract.ipynb</code></td><td>Data contract and feature frame</td></tr>
+            <tr><td>W04</td><td><code>w04_baseline_score.ipynb</code></td><td>Baseline rule, signal checks, top-10 review</td></tr>
+            <tr><td>W05</td><td><code>w05_model.ipynb</code></td><td>Random Forest model vs baseline</td></tr>
+            <tr><td>W06</td><td><code>w06_validation_audit.ipynb</code></td><td>Grouped split, leakage audit, claim rewrite</td></tr>
+            <tr><td>W07</td><td><code>w07_action_playbook.ipynb</code></td><td>Action playbook and exports</td></tr>
+        </table>
+        <p>
+            <strong>Repository:</strong> <a href="https://github.com/Zain-ul-abdeen-773/flyrank-ml-internship">github.com/Zain-ul-abdeen-773/flyrank-ml-internship</a>
+        </p>
+    </section>
+
+    <!-- 8. Acknowledgments -->
+    <section>
+        <h2>8. Acknowledgments and Data Credit</h2>
+        <p>
+            Built on the <a href="https://flyrank.ai">FlyRank</a> ML Internship dataset. The internship warehouse contains privacy-safe, hashed, and aggregated search performance data from production systems. No raw client data, URLs, or private search queries appear in this paper or the supporting code.
+        </p>
+        <p>
+            Thank you to Haris and the FlyRank team for designing the internship curriculum, curating the dataset, and providing the live session walkthroughs that shaped this analysis.
+        </p>
+    </section>
+
+</div>
+
+<footer>
+    <div class="container">
+        <p>
+            Zain-ul-Abdeen &middot; FlyRank ML Internship 2026 &middot;
+            Built on the <a href="https://flyrank.ai">FlyRank</a> ML Internship dataset
+        </p>
+    </div>
+</footer>
+
+</body>
+</html>
