@@ -367,11 +367,12 @@
     <div class="abstract-card" id="abstract">
         <div class="label">Abstract</div>
         <p>
-            How can SEO teams systematically identify pages that underperform their expected click-through rate given their search ranking?
-            We built a Random Forest regression model trained on aggregated Google Search Console and GA4 metrics from a 79-million-row production warehouse,
+            FlyRank's content engine drives organic growth for its clients, but identifying which pages in a portfolio are leaving clicks on the table remains a manual, time-consuming process.
+            This paper asks: can we systematically surface underperforming pages by measuring the gap between their expected CTR (given their search ranking) and their actual CTR?
+            We built a Random Forest regression model trained on aggregated Google Search Console and GA4 metrics from FlyRank's 79-million-row production warehouse,
             predicting expected CTR as a function of average position, session volume, and content intent.
-            On a grouped validation split (no client leakage), the model achieved a lower MAE than the hardcoded three-bucket baseline, producing a ranked queue of content optimization opportunities.
-            The resulting action playbook provides directional decision-support for editorial teams, not automated deployment, with explicit no-go cases and monitoring triggers documented throughout.
+            On a grouped validation split (no client leakage), the model achieved a lower MAE than the hardcoded three-bucket baseline, producing a ranked queue of content optimization opportunities that plugs directly into FlyRank's editorial review workflow.
+            The resulting action playbook provides directional decision-support for content teams, not automated deployment, with explicit no-go cases and monitoring triggers documented throughout.
         </p>
     </div>
 
@@ -382,13 +383,13 @@
         <section>
             <h2><span class="section-num">1</span> Introduction</h2>
             <p>
-                Organic search remains the primary traffic channel for content-driven websites. Google Search Console exposes per-page metrics including impressions, clicks, average position, and CTR. However, <strong>raw CTR alone is misleading</strong>: a page ranking at position 1 with 5% CTR is far more problematic than a page at position 15 with the same CTR, because position 1 commands a much higher expected click share.
+                FlyRank helps businesses grow their organic search traffic through automated content optimization. Across client portfolios, content teams face a recurring challenge: <strong>which pages in a site are underperforming relative to their search visibility, and which of those represent real optimization opportunities versus noise?</strong> Google Search Console exposes per-page metrics including impressions, clicks, average position, and CTR, but raw CTR alone is misleading: a page ranking at position 1 with 5% CTR is far more problematic than a page at position 15 with the same rate, because position 1 commands a much higher expected click share.
             </p>
             <p>
-                The core question driving this work: <strong>Which pages have the largest gap between their expected CTR (given their ranking) and their actual CTR, weighted by search volume?</strong> This gap, which we call the <em>CTR Opportunity Score</em>, represents the estimated number of missed clicks recoverable through title and meta description optimization.
+                This paper tackles the core content problem that FlyRank's editorial workflow needs to solve at scale: <strong>which pages have the largest gap between their expected CTR (given their ranking) and their actual CTR, weighted by search volume?</strong> This gap, which we call the <em>CTR Opportunity Score</em>, represents the estimated number of missed clicks recoverable through title and meta description optimization. By surfacing these pages in a ranked queue, content teams can prioritize their highest-impact reviews instead of manually auditing entire portfolios.
             </p>
             <p>
-                A simple rule-based baseline (position 1-3 = 20% expected CTR, 4-10 = 5%, 11+ = 1%) was built first. The modeling phase then attempted to improve on this baseline using a Random Forest trained on richer features.
+                A simple rule-based baseline (position 1-3 = 20% expected CTR, 4-10 = 5%, 11+ = 1%) was built first to establish a floor. The modeling phase then attempted to improve on this baseline using a Random Forest trained on richer features, with the goal of producing a tighter, more accurate opportunity ranking that fits into FlyRank's existing content review process.
             </p>
         </section>
 
