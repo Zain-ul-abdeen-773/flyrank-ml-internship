@@ -44,6 +44,7 @@
             font-size: 16px;
             -webkit-font-smoothing: antialiased;
         }
+        html { scroll-behavior: smooth; }
 
         /* ── Top accent bar ── */
         .top-bar {
@@ -125,6 +126,7 @@
             align-items: center;
             justify-content: center;
             gap: 16px;
+            flex-wrap: wrap;
             font-size: 14px;
             color: var(--text-secondary);
         }
@@ -233,6 +235,8 @@
             padding: 2px 8px;
             border-radius: 4px;
             border: 1px solid var(--green-100);
+            overflow-wrap: anywhere;
+            word-break: break-word;
         }
 
         /* ── Tables ── */
@@ -244,6 +248,9 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             overflow: hidden;
+            display: block;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
         .paper th {
             background: var(--green-50);
@@ -319,8 +326,33 @@
 
         /* ── Responsive ── */
         @media (max-width: 640px) {
+            .container { padding: 0 16px; }
+            nav { padding: 12px 0; }
+            nav .logo { font-size: 16px; }
+            .hero { padding: 44px 0 36px; }
             .hero h1 { font-size: 28px; }
+            .hero .subtitle { font-size: 16px; }
+            .hero .author-info {
+                font-size: 13px;
+                gap: 8px;
+                line-height: 1.5;
+            }
+            .hero .author-info .dot { display: none; }
+            .abstract-card { padding: 22px; }
             .paper { padding: 24px; }
+            .paper section { padding: 24px 0; }
+            .paper h2 { font-size: 20px; }
+            .paper h2 .section-num {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+            .paper table {
+                font-size: 13px;
+                min-width: 560px;
+            }
+            .paper th, .paper td { padding: 10px 12px; }
+            .footer-card { padding: 28px 20px; }
             nav .nav-links { display: none; }
         }
     </style>
@@ -367,12 +399,12 @@
     <div class="abstract-card" id="abstract">
         <div class="label">Abstract</div>
         <p>
-            FlyRank's content engine drives organic growth for its clients, but identifying which pages in a portfolio are leaving clicks on the table remains a manual, time-consuming process.
-            This paper asks: can we systematically surface underperforming pages by measuring the gap between their expected CTR (given their search ranking) and their actual CTR?
-            We built a Random Forest regression model trained on aggregated Google Search Console and GA4 metrics from FlyRank's 79-million-row production warehouse,
-            predicting expected CTR as a function of average position, session volume, and content intent.
-            On a grouped validation split (no client leakage), the model achieved a lower MAE than the hardcoded three-bucket baseline, producing a ranked queue of content optimization opportunities that plugs directly into FlyRank's editorial review workflow.
-            The resulting action playbook provides directional decision-support for content teams, not automated deployment, with explicit no-go cases and monitoring triggers documented throughout.
+            FlyRank's content engine drives organic growth for its clients, yet identifying which pages are leaving clicks on the table is still a manual, time-intensive process.
+            This paper addresses that gap by measuring the difference between expected CTR (given ranking) and observed CTR, then using that difference to prioritize review candidates.
+            To do this, we trained a Random Forest regression model on aggregated Google Search Console and GA4 signals from FlyRank's 79-million-row production warehouse,
+            modeling expected CTR as a function of average position, session volume, and content intent.
+            On a grouped validation split with no client leakage, the model outperformed the hardcoded three-bucket baseline on MAE, generating a practical, ranked queue of optimization opportunities for editorial teams.
+            The final playbook is intentionally decision-support, not auto-deployment, and includes explicit no-go conditions plus monitoring triggers to keep recommendations safe.
         </p>
     </div>
 
@@ -386,10 +418,10 @@
                 FlyRank helps businesses grow their organic search traffic through automated content optimization. Across client portfolios, content teams face a recurring challenge: <strong>which pages in a site are underperforming relative to their search visibility, and which of those represent real optimization opportunities versus noise?</strong> Google Search Console exposes per-page metrics including impressions, clicks, average position, and CTR, but raw CTR alone is misleading: a page ranking at position 1 with 5% CTR is far more problematic than a page at position 15 with the same rate, because position 1 commands a much higher expected click share.
             </p>
             <p>
-                This paper tackles the core content problem that FlyRank's editorial workflow needs to solve at scale: <strong>which pages have the largest gap between their expected CTR (given their ranking) and their actual CTR, weighted by search volume?</strong> This gap, which we call the <em>CTR Opportunity Score</em>, represents the estimated number of missed clicks recoverable through title and meta description optimization. By surfacing these pages in a ranked queue, content teams can prioritize their highest-impact reviews instead of manually auditing entire portfolios.
+                Building on that context, this paper focuses on the central workflow question: <strong>which pages have the largest gap between expected CTR (given ranking) and actual CTR, weighted by search volume?</strong> We call this the <em>CTR Opportunity Score</em>, an estimate of missed clicks that may be recoverable through stronger titles and meta descriptions. By ranking pages using this score, content teams can prioritize high-impact reviews instead of manually auditing entire portfolios.
             </p>
             <p>
-                A simple rule-based baseline (position 1-3 = 20% expected CTR, 4-10 = 5%, 11+ = 1%) was built first to establish a floor. The modeling phase then attempted to improve on this baseline using a Random Forest trained on richer features, with the goal of producing a tighter, more accurate opportunity ranking that fits into FlyRank's existing content review process.
+                We first established a transparent rule-based baseline (position 1-3 = 20% expected CTR, 4-10 = 5%, 11+ = 1%) as the minimum bar. We then tested whether a Random Forest with richer inputs could produce a more precise ranking while still fitting naturally into FlyRank's existing human review process.
             </p>
         </section>
 
@@ -398,6 +430,9 @@
             <h2><span class="section-num">2</span> Data</h2>
             <p>
                 All analyses use the <strong>FlyRank ML Internship dataset</strong>, a privacy-safe warehouse hosted on Hugging Face containing hashed, aggregated search performance data. No raw URLs, client names, or private queries appear in this paper or the underlying code.
+            </p>
+            <p>
+                With the problem framing defined, the next step is to establish exactly what data enters the model and what constraints preserve validity.
             </p>
             <h3>Tables Used</h3>
             <table>
@@ -449,7 +484,7 @@
 
             <h3>3.5 Model</h3>
             <p>
-                <code>RandomForestRegressor(n_estimators=100, max_depth=10)</code> trained on one-hot-encoded features. Chosen for its ability to capture the non-linear CTR decay curve without manual feature engineering.
+                <code>RandomForestRegressor(n_estimators=100, max_depth=10)</code> trained on one-hot-encoded features. This choice preserves interpretability while capturing the non-linear CTR decay curve without heavy manual feature engineering.
             </p>
 
             <h3>3.6 Validation Design</h3>
@@ -495,18 +530,21 @@
 
             <h3>4.2 Honest Split Impact</h3>
             <p>
-                Switching from a random split to the grouped-by-client split caused R-squared to drop slightly, confirming that the naive split inflated performance by memorizing client-specific CTR baselines.
+                Moving from a random split to the grouped-by-client split reduced R-squared, confirming that the naive setup was overstating performance by leaking client-specific CTR patterns into both train and test.
             </p>
 
             <h3>4.3 Feature Importance</h3>
             <p>
-                Permutation importance confirmed that <code>avg_pos</code> is the dominant predictor, followed by <code>sessions</code>. Content intent provides marginal additional signal.
+                With validation behavior established, permutation importance shows that <code>avg_pos</code> is the dominant predictor, followed by <code>sessions</code>, while content intent contributes smaller but useful incremental signal.
             </p>
         </section>
 
         <!-- 5. Limitations -->
         <section>
             <h2><span class="section-num">5</span> Limitations</h2>
+            <p>
+                Although the model improves ranking quality over baseline, the following limits define where human judgment remains essential.
+            </p>
             <ul>
                 <li><strong>SERP Blindness:</strong> The model sees average position, not actual pixel depth. Google Ads, Shopping Carousels, AI Overviews, and Featured Snippets compress organic real estate without changing reported position.</li>
                 <li><strong>Branded vs Non-Branded:</strong> All impressions are pooled. Competitor branded terms where we rank #2 will always have low CTR regardless of title quality.</li>
@@ -518,6 +556,9 @@
         <!-- 6. Recommendations -->
         <section id="recommendations">
             <h2><span class="section-num">6</span> Ranked Recommendations</h2>
+            <p>
+                Given those constraints, recommendations are structured as review priorities with explicit safeguards rather than automatic execution.
+            </p>
 
             <h3>Action Queue</h3>
             <table>
